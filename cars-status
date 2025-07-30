@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRC LIVE M.3</title>
+    <style>
+        /* --- General Body Styles for both Login and Status views --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eef2f7; /* Soft background color */
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative; /* สำหรับวางข้อความเวอร์ชัน */
+        }
+
+        /* --- Card Container Styles (for both Login and Status views) --- */
+        .card-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 40px;
+            text-align: center;
+            width: 90%;
+            box-sizing: border-box;
+            margin: 20px auto;
+        }
+
+        /* Specific max-width for login card */
+        #login-view.card-container {
+            max-width: 400px;
+            padding-bottom: 40px; 
+        }
+
+        /* Specific max-width for status view */
+        #status-view.card-container {
+            max-width: 1000px; /* เพิ่มความกว้างให้รองรับรูปภาพ */
+            padding: 25px 30px;
+        }
+
+        /* --- Headings --- */
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        /* Status page specific heading styles */
+        #status-view h1 {
+            margin-bottom: 35px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+
+        /* --- Subtitle and Author (Login View) --- */
+        .subtitle {
+            color: #6c757d;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .author {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 30px; 
+            font-style: italic;
+        }
+
+        /* --- Logo Styles --- */
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 150px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        /* สไตล์สำหรับโลโก้แบบไม่มีพื้นหลังขาว */
+        .logo.no-bg {
+            border-radius: 0;
+            box-shadow: none;
+            width: 180px; /* เพิ่มขนาดโลโก้ให้ใหญ่ขึ้นเล็กน้อย */
+        }
+
+        /* --- Input Fields (Password Input on Login View) --- */
+        .password-input {
+            width: calc(100% - 20px);
+            padding: 12px 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            display: block; /* แสดงช่องกรอกรหัสผ่าน */
+        }
+
+        .password-input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        /* --- Button Styles (Login View) */
+        .login-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* ระยะห่างระหว่างปุ่ม */
+            margin-top: 25px; /* ระยะห่างจากช่องรหัสผ่าน */
+        }
+
+        .login-buttons button {
+            width: 100%; /* ให้ปุ่มเต็มความกว้างของ container */
+            padding: 15px 35px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        .login-buttons button.secondary { /* สำหรับปุ่มรองในหน้า Login */
+            background-color: #6c757d; /* สีเทาสำหรับปุ่มรอง */
+            box-shadow: 0 4px 10px rgba(108, 117, 125, 0.2);
+        }
+
+        .login-buttons button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .login-buttons button.secondary:hover {
+            background-color: #5a6268;
+            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .login-buttons button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+        }
+        .login-buttons button.secondary:active {
+            box-shadow: 0 2px 5px rgba(108, 117, 125, 0.2);
+        }
+
+        /* --- Error Message Styles (Login View) --- */
+        .error-message {
+            color: #dc3545;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none; /* ซ่อนข้อความ error */
+        }
+
+        /* --- Car List Styles (Status View) --- */
+        .car-list {
+            margin-top: 25px;
+        }
+
+        .car-item {
+            display: flex;
+            flex-wrap: nowrap; /* พยายามให้อยู่ในบรรทัดเดียว */
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            margin-bottom: 12px;
+            background-color: #f8fafd;
+            border-left: 5px solid #007bff;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .car-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        /* Styles for car image within car-item */
+        .car-image-container {
+            flex-shrink: 0; /* ป้องกันไม่ให้รูปภาพหดตัว */
+            margin-right: 20px;
+            width: 150px; /* กำหนดขนาดรูปภาพ */
+            height: 100px; /* กำหนดขนาดรูปภาพ */
+            overflow: hidden; /* ซ่อนส่วนเกินของรูปภาพ */
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex; /* ใช้ flexbox จัดกลางรูปภาพ */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .car-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* ครอบคลุมพื้นที่และตัดส่วนเกิน */
+            display: block; /* ลบช่องว่างด้านล่างรูป */
+        }
+
+        .car-details {
+            flex-grow: 1;
+            flex-shrink: 1;
+            margin-right: 20px;
+            text-align: left;
+            min-width: 200px; 
+        }
+
+        .car-details h3 {
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+            font-size: 1.3em;
+        }
+
+        .car-details p {
+            margin: 0;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .car-status {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1em;
+        }
+
+        /* Actions container in status view */
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0; /* ป้องกัน actions ไม่ให้หดตัว */
+        }
+
+        select {
+            padding: 10px 12px;
+            border: 1px solid #cce0ff;
+            border-radius: 5px;
+            font-size: 1rem;
+            min-width: 120px; 
+            flex-grow: 1;
+            flex-shrink: 1;
+            background-color: #e6f2ff;
+            cursor: pointer;
+        }
+        
+        .actions button {
+            flex-shrink: 0;
+            width: 80px;
+            padding: 10px 15px;
+            font-size: 1em;
+            background-color: #007bff; /* สีน้ำเงินสำหรับปุ่มอัปเดต */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+        }
+
+        .actions button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .actions button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+        }
+
+        /* --- View Management (controlled by basic JS for switching between login/status) --- */
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- Footer (Version Info) --- */
+        .version-info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            color: #888;
+            font-size: 0.85em;
+            text-align: left;
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 900px) { 
+            .car-item {
+                flex-wrap: wrap; 
+                flex-direction: column; 
+                align-items: flex-start; 
+            }
+            .car-image-container {
+                width: 100%; 
+                height: 200px; 
+                margin-bottom: 15px; 
+                margin-right: 0;
+            }
+            .car-details {
+                margin-right: 0;
+                margin-bottom: 10px;
+                flex-basis: 100%; 
+                min-width: unset; 
+            }
+            .actions {
+                flex-direction: row; 
+                flex-basis: 100%; 
+                justify-content: space-between; 
+                flex-wrap: nowrap; 
+            }
+            select {
+                flex-grow: 1; 
+                max-width: calc(100% - 90px); 
+            }
+            .actions button {
+                width: 80px; 
+            }
+        }
+
+        @media (max-width: 550px) { 
+            .actions {
+                flex-direction: column; 
+                align-items: stretch; 
+            }
+            select, .actions button {
+                width: 100%; 
+                max-width: 100%;
+                margin-bottom: 10px; 
+            }
+            .actions button {
+                margin-bottom: 0; 
+            }
+            .version-info {
+                font-size: 0.75em; 
+                bottom: 10px;
+                left: 10px;
+            }
+            .login-buttons {
+                gap: 10px; 
+            }
+        }
+
+        /* --- Styles for Add Car Modal (Popup) --- */
+        #addCarModal {
+            /* display: none; */ /* จะถูกควบคุมด้วย JS */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #addCarModal > div { /* Modal content box */
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        #addCarModal h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        #addCarModal form p {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        #addCarModal label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        #addCarModal input[type="text"],
+        #addCarModal input[type="url"],
+        #addCarModal select { /* เพิ่ม select */
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px; /* Adjust margin if needed */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box; /* Include padding in width */
+            transition: border-color 0.2s ease;
+        }
+
+        #addCarModal input[type="text"]:focus,
+        #addCarModal input[type="url"]:focus,
+        #addCarModal select:focus { /* เพิ่ม select */
+            border-color: #007bff;
+            outline: none;
+        }
+
+        #addCarModal button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+
+        #addCarModal button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            margin-right: 10px;
+        }
+
+        #addCarModal button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #addCarModal button#cancelAddCar {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        #addCarModal button#cancelAddCar:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div id="login-view" class="card-container">
+        <div class="logo-container">
+            <img src="images/S__30875655.jpg" alt="PRC Live Logo" class="logo no-bg">
+        </div>
+        <h1>PRC LIVE M.3</h1>
+        <p class="subtitle">LIVE AND PHOTOGRAPHY</p>
+        <p class="author">By The Prince Royal's College M.3</p>
+
+        <input type="password" id="passwordInput" class="password-input" placeholder="กรอกรหัสผ่าน">
+        <p id="errorMessage" class="error-message">รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่</p>
+        
+        <div class="login-buttons">
+            <button id="loginButton">เข้าสู่ระบบ</button>
+        </div>
+    </div>
+
+    <div id="status-view" class="card-container hidden">
+        <h1>สถานะรถปัจจุบัน</h1>
+        <button id="addCarButton" style="margin-bottom: 20px; padding: 12px 25px; background-color: #28a745; color: white; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; transition: background-color 0.2s ease;">เพิ่มยานพาหนะใหม่</button>
+
+        <div id="carList" class="car-list">
+            กำลังโหลดข้อมูลรถ...
+        </div>
+    </div>
+
+    <div id="addCarModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-width: 500px; width: 90%;">
+            <h2>เพิ่มยานพาหนะใหม่</h2>
+            <form id="newCarForm">
+                <p><label>ทะเบียนรถ:</label><input type="text" id="newLicensePlate" required style="width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"></p>
+                <p><label>รุ่นรถ:</label><input type="text" id="newModel" required style="width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"></p>
+                <p><label>สีรถ:</label><input type="text" id="newColor" required style="width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;"></p>
+                <p><label>URL รูปภาพ:</label><input type="url" id="newImageUrl" placeholder="เช่น https://example.com/car.jpg" style="width: calc(100% - 22px); padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px;"></p>
+                
+                <p><label>เลือกเส้นทาง:</label>
+                    <select id="newRouteSelect" style="width: calc(100% - 22px); padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; background-color: #f0f8ff;">
+                        </select>
+                </p>
+
+                <button type="submit" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">บันทึก</button>
+                <button type="button" id="cancelAddCar" style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">ยกเลิก</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteCarModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1001;">
+        <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-width: 400px; width: 90%; text-align: center;">
+            <h2>ยืนยันการลบยานพาหนะ</h2>
+            <p style="margin-bottom: 20px;">คุณแน่ใจหรือไม่ว่าต้องการลบยานพาหนะนี้? โปรดยืนยันด้วยรหัสผ่าน:</p>
+            <input type="password" id="deletePasswordInput" placeholder="กรอกรหัสผ่าน" style="width: calc(100% - 22px); padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; text-align: center;">
+            <p id="deleteErrorMessage" class="error-message" style="margin-top: -10px; margin-bottom: 20px;"></p>
+            <button type="button" id="confirmDeleteButton" style="background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">ยืนยันการลบ</button>
+            <button type="button" id="cancelDeleteButton" style="background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">ยกเลิก</button>
+        </div>
+    </div>
+
+    <div class="version-info">
+        V. 1.0.0 power by AI from Photo Team M.3
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script>
+        // --- 1. Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBF3E4NajnNgmIOpdqQXfN_FgS0GBkD_nU",
+            authDomain: "car-status-f836f.firebaseapp.com",
+            databaseURL: "https://car-status-f836f-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "car-status-f836f",
+            storageBucket: "car-status-f836f.firebasestorage.app",
+            messagingSenderId: "952244690838",
+            appId: "1:952244690838:web:22f3775dad564cf4f9c7b7",
+            measurementId: "G-ZE7B3QS52C"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        const carsRef = database.ref('cars'); // อ้างอิงถึง node 'cars' ใน Realtime Database
+
+        // --- 2. Element References ---
+        const loginView = document.getElementById('login-view');
+        const statusView = document.getElementById('status-view');
+        const loginButton = document.getElementById('loginButton');
+        const passwordInput = document.getElementById('passwordInput');
+        const errorMessage = document.getElementById('errorMessage');
+        const carListDiv = document.getElementById('carList');
+
+        // Element สำหรับฟอร์มเพิ่มรถ
+        const addCarButton = document.getElementById('addCarButton');
+        const addCarModal = document.getElementById('addCarModal');
+        const newCarForm = document.getElementById('newCarForm');
+        const newLicensePlateInput = document.getElementById('newLicensePlate');
+        const newModelInput = document.getElementById('newModel');
+        const newColorInput = document.getElementById('newColor');
+        const newImageUrlInput = document.getElementById('newImageUrl');
+        const newRouteSelect = document.getElementById('newRouteSelect'); 
+        const cancelAddCarButton = document.getElementById('cancelAddCar');
+
+        // Element สำหรับฟอร์มลบรถ
+        const deleteCarModal = document.getElementById('deleteCarModal');
+        const deletePasswordInput = document.getElementById('deletePasswordInput');
+        const deleteErrorMessage = document.getElementById('deleteErrorMessage');
+        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+        const cancelDeleteButton = document.getElementById('cancelDeleteButton');
+
+        // Global variable เพื่อเก็บ carId ที่ต้องการลบ
+        let carIdToDelete = null;
+
+        // --- 3. Global Variables ---
+        const CORRECT_PASSWORD = "123456"; // รหัสผ่านสำหรับเข้าสู่ระบบ
+        const DELETE_PASSWORD = "124356"; // รหัสผ่านสำหรับลบรถ
+
+        // กำหนดสถานะที่เป็นไปได้สำหรับแต่ละเส้นทาง
+        const statusOptionsByRoute = {
+            "เส้นทาง 1 (ไป แจ่มฟ้า)": [ 
+                "กำลังไปรับจุดรับส่ง แจ่มฟ้า สันกำแพง",
+                "ถึงจุดรับ-ส่ง แจ่มฟ้า สันกำแพง",
+                "กำลังเดินทางไปสนามกอล์ฟ",
+                "ถึงสนามกอล์ฟ",
+                "กำลังกลับจุดรับส่ง",
+                "ถึงจุดรับส่งแล้ว",
+                "ระบบยังไม่เปิดทำการ" // เพิ่มสถานะนี้
+            ],
+            "เส้นทาง 2 (ไปเซ็นทรัลเฟส)": [ 
+                "กำลังไปรับจุดรับส่ง เซนทรัลเฟส",
+                "ถึงจุดรับ-ส่ง เซนทรัลเฟส",
+                "กำลังเดินทางไปสนามกอล์ฟ", 
+                "ถึงสนามกอล์ฟ", 
+                "กำลังกลับจุดรับส่ง", 
+                "ถึงจุดรับส่งแล้ว",
+                "ระบบยังไม่เปิดทำการ" // เพิ่มสถานะนี้
+            ],
+            "ทั่วไป (จอดพัก/ซ่อม)": [
+                "จอดพัก",
+                "ซ่อมบำรุง",
+                "พร้อมให้บริการ",
+                "ระบบยังไม่เปิดทำการ"
+            ]
+        };
+
+        // ชื่อเส้นทางเริ่มต้นที่ใช้ใน dropdown ของฟอร์มเพิ่มรถ
+        const ROUTE_OPTIONS = Object.keys(statusOptionsByRoute);
+
+        // --- 4. Functions for View Management ---
+        function showView(viewId) {
+            loginView.classList.add('hidden');
+            statusView.classList.add('hidden');
+            // ซ่อน modal เพิ่มรถและลบรถเสมอเมื่อเปลี่ยน view
+            addCarModal.style.display = 'none'; 
+            deleteCarModal.style.display = 'none'; 
+            document.getElementById(viewId).classList.remove('hidden');
+        }
+
+        // --- 5. Firebase Data Handling Functions ---
+
+        // ฟังก์ชันสำหรับดึงข้อมูลรถจาก Firebase และแสดงผล
+        function loadCars() {
+            carListDiv.innerHTML = 'กำลังโหลดข้อมูลรถ...'; // แสดงข้อความโหลด
+            carsRef.on('value', (snapshot) => {
+                const cars = snapshot.val();
+                carListDiv.innerHTML = ''; // ล้างข้อมูลเก่า
+                if (cars) {
+                    Object.keys(cars).forEach(carId => {
+                        const car = cars[carId];
+                        // กำหนดสถานะที่ใช้ได้สำหรับรถคันนี้ตามเส้นทางที่เลือกไว้
+                        const currentRouteOptions = statusOptionsByRoute[car.route] || statusOptionsByRoute["ทั่วไป (จอดพัก/ซ่อม)"]; // ใช้ "ทั่วไป" เป็นค่าเริ่มต้น
+                        
+                        // สร้าง options HTML สำหรับ select โดยวนลูปจาก currentRouteOptions
+                        let optionsHtml = '';
+                        currentRouteOptions.forEach(status => {
+                            const selected = (car.status === status) ? 'selected' : '';
+                            optionsHtml += `<option value="${status}" ${selected}>${status}</option>`;
+                        });
+
+                        const carItemHTML = `
+                            <form class="car-item" data-car-id="${carId}">
+                                <div class="car-image-container">
+                                    <img src="${car.imageUrl || 'https://via.placeholder.com/150x100?text=No+Image'}" alt="${car.model}">
+                                </div>
+                                <div class="car-details">
+                                    <h3>ทะเบียน: ${car.licensePlate || 'ไม่ระบุ'}</h3>
+                                    <p>${car.model || 'ไม่ระบุ'} ${car.color || 'ไม่ระบุ'}</p>
+                                    <p>เส้นทาง: <span style="font-weight: bold; color: #0056b3;">${car.route || 'ไม่ระบุ'}</span></p> 
+                                    <p>สถานะ: <span class="car-status" id="${carId}-status">${car.status || 'ไม่ระบุสถานะ'}</span></p>
+                                </div>
+                                <div class="actions">
+                                    <select name="new_status" id="${carId}-select" data-car-id="${carId}">
+                                        ${optionsHtml} 
+                                    </select>
+                                    <button type="button" class="update-button">อัปเดต</button>
+                                    <button type="button" class="delete-button" data-car-id="${carId}" style="background-color: #dc3545; margin-left: 10px;">ลบ</button>
+                                </div>
+                            </form>
+                        `;
+                        carListDiv.insertAdjacentHTML('beforeend', carItemHTML);
+
+                        // ตั้งค่าสถานะเริ่มต้นใน dropdown
+                        const selectElement = document.getElementById(`${carId}-select`);
+                        if (selectElement) {
+                            selectElement.value = car.status || currentRouteOptions[0]; // ตั้งค่า dropdown ให้ตรงกับสถานะปัจจุบัน หรือตัวแรกของเส้นทางนั้น
+                        }
+                    });
+
+                    // หลังจากโหลดข้อมูลและสร้าง UI แล้ว ค่อยเพิ่ม Event Listeners ให้กับปุ่มต่างๆ
+                    addUpdateEventListeners();
+                    addSelectChangeListeners();
+                    addDeleteEventListeners(); 
+
+                } else {
+                    carListDiv.innerHTML = '<p>ไม่พบข้อมูลรถยนต์ในระบบ. กรุณาเพิ่มยานพาหนะใหม่โดยกดปุ่ม "เพิ่มยานพาหนะใหม่" ด้านบน</p>';
+                }
+            }, (error) => {
+                console.error("Error loading cars:", error);
+                carListDiv.innerHTML = '<p style="color: red;">เกิดข้อผิดพลาดในการโหลดข้อมูลรถ.</p>';
+                errorMessage.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ Firebase';
+                errorMessage.style.display = 'block';
+            });
+        }
+
+        // ฟังก์ชันสำหรับเพิ่มรถใหม่เข้า Firebase
+        function addNewCar(carData) {
+            const newCarRef = carsRef.push();
+            newCarRef.set({
+                licensePlate: carData.licensePlate,
+                model: carData.model,
+                color: carData.color,
+                imageUrl: carData.imageUrl || '',
+                route: carData.route, 
+                status: statusOptionsByRoute[carData.route][0] || "พร้อมให้บริการ" 
+            })
+            .then(() => {
+                console.log("New car added successfully!");
+                alert("เพิ่มยานพาหนะใหม่สำเร็จ!");
+                addCarModal.style.display = 'none';
+                newCarForm.reset();
+                populateRouteOptions(); // เรียกฟังก์ชัน populate dropdown อีกครั้งเพื่อ reset
+            })
+            .catch((error) => {
+                console.error("Error adding new car:", error);
+                alert(`ไม่สามารถเพิ่มยานพาหนะได้: ${error.message}`);
+            });
+        }
+
+        // ฟังก์ชันสำหรับลบรถจาก Firebase
+        function deleteCar(carId) {
+            carsRef.child(carId).remove()
+                .then(() => {
+                    console.log(`Car ${carId} deleted successfully!`);
+                    alert(`ยานพาหนะทะเบียน ${carId} ถูกลบเรียบร้อยแล้ว!`);
+                    deleteCarModal.style.display = 'none'; // ซ่อน modal
+                    deletePasswordInput.value = ''; // ล้างรหัสผ่าน
+                    deleteErrorMessage.style.display = 'none'; // ซ่อน error
+                    carIdToDelete = null; // ล้าง carId ที่จะลบ
+                    // loadCars() จะถูกเรียกอัตโนมัติจาก on('value') listener
+                })
+                .catch((error) => {
+                    console.error("Error deleting car:", error);
+                    alert(`ไม่สามารถลบยานพาหนะได้: ${error.message}`);
+                    deleteErrorMessage.textContent = `ไม่สามารถลบได้: ${error.message}`;
+                    deleteErrorMessage.style.display = 'block';
+                });
+        }
+
+        // ฟังก์ชันสำหรับอัปเดตสถานะใน Firebase Realtime Database
+        function updateCarStatus(carId, newStatus) {
+            carsRef.child(carId).update({ status: newStatus })
+                .then(() => {
+                    console.log(`Status for ${carId} updated to: ${newStatus}`);
+                    alert(`สถานะรถทะเบียน ${carId} อัปเดตเป็น "${newStatus}" เรียบร้อยแล้ว!`);
+                })
+                .catch((error) => {
+                    console.error("Error updating status:", error);
+                    alert(`ไม่สามารถอัปเดตสถานะรถทะเบียน ${carId} ได้: ${error.message}`);
+                    errorMessage.textContent = 'ไม่สามารถอัปเดตสถานะได้ ตรวจสอบสิทธิ์การเข้าถึง';
+                    errorMessage.style.display = 'block';
+                });
+        }
+
+        // ฟังก์ชันสำหรับอัปเดตสถานะที่แสดงบนหน้าจอเมื่อเลือกใน dropdown (UI Only)
+        function updateDisplayedStatus(spanId, newStatus) {
+            const statusSpan = document.getElementById(spanId);
+            if (statusSpan) {
+                statusSpan.textContent = newStatus;
+            }
+        }
+
+        // ฟังก์ชันสำหรับเติม options ใน dropdown เลือกเส้นทาง
+        function populateRouteOptions() {
+            newRouteSelect.innerHTML = ''; // ล้าง options เดิม
+            ROUTE_OPTIONS.forEach(route => {
+                const option = document.createElement('option');
+                option.value = route;
+                option.textContent = route;
+                newRouteSelect.appendChild(option);
+            });
+        }
+
+        // --- 6. Event Listeners ---
+
+        loginButton.addEventListener('click', async () => {
+            const password = passwordInput.value;
+            if (password === CORRECT_PASSWORD) {
+                errorMessage.style.display = 'none';
+                try {
+                    await auth.signInAnonymously();
+                    console.log("Firebase Anonymous User Logged In.");
+                    loadCars(); // โหลดข้อมูลรถเมื่อ Login สำเร็จ
+                    showView('status-view');
+                } catch (error) {
+                    console.error("Error signing in anonymously:", error);
+                    errorMessage.textContent = `เกิดข้อผิดพลาดในการเข้าสู่ระบบ Firebase: ${error.message}`;
+                    errorMessage.style.display = 'block';
+                }
+            } else {
+                errorMessage.textContent = 'รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        passwordInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                loginButton.click();
+            }
+        });
+
+        passwordInput.addEventListener('input', function() {
+            errorMessage.style.display = 'none';
+        });
+
+        // Event Listeners สำหรับปุ่ม "อัปเดต"
+        function addUpdateEventListeners() {
+            document.querySelectorAll('.update-button').forEach(button => {
+                button.onclick = null; 
+                button.addEventListener('click', (event) => {
+                    const form = event.target.closest('.car-item');
+                    const carId = form.dataset.carId;
+                    const newStatus = form.querySelector('select').value;
+                    if (confirm(`คุณต้องการอัปเดตสถานะรถทะเบียน ${carId} เป็น "${newStatus}" ใช่หรือไม่?`)) {
+                        updateCarStatus(carId, newStatus);
+                    }
+                });
+            });
+        }
+        
+        // Event Listeners สำหรับการเปลี่ยนแปลงใน dropdown
+        function addSelectChangeListeners() {
+            document.querySelectorAll('.actions select').forEach(select => {
+                select.onchange = null; 
+                select.addEventListener('change', (event) => {
+                    const carId = event.target.dataset.carId;
+                    const newStatus = event.target.value;
+                    const statusSpan = document.getElementById(`${carId}-status`);
+                    if (statusSpan) {
+                        statusSpan.textContent = newStatus;
+                    }
+                });
+            });
+        }
+
+        // Event listener สำหรับปุ่ม "เพิ่มยานพาหนะใหม่"
+        addCarButton.addEventListener('click', () => {
+            populateRouteOptions(); // เรียกฟังก์ชันนี้เมื่อเปิด Modal
+            addCarModal.style.display = 'flex';
+        });
+
+        // Event listener สำหรับปุ่ม "ยกเลิก" ใน form เพิ่มรถ
+        cancelAddCarButton.addEventListener('click', () => {
+            addCarModal.style.display = 'none';
+            newCarForm.reset();
+            populateRouteOptions(); // เรียกฟังก์ชันนี้เมื่อยกเลิกเพื่อ reset dropdown
+        });
+
+        // Event listener สำหรับการ submit form เพิ่มรถ
+        newCarForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            const carData = {
+                licensePlate: newLicensePlateInput.value.trim(),
+                model: newModelInput.value.trim(),
+                color: newColorInput.value.trim(),
+                imageUrl: newImageUrlInput.value.trim(),
+                route: newRouteSelect.value 
+            };
+
+            if (!carData.licensePlate || !carData.model || !carData.color || !carData.route) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วนและเลือกเส้นทาง!");
+                return;
+            }
+
+            addNewCar(carData);
+        });
+
+        // เพิ่ม Event Listeners ให้กับปุ่ม "ลบ" ทั้งหมดที่ถูกสร้างขึ้นมา
+        function addDeleteEventListeners() {
+            document.querySelectorAll('.delete-button').forEach(button => {
+                button.onclick = null; 
+                button.addEventListener('click', (event) => {
+                    carIdToDelete = event.target.dataset.carId;
+                    deleteCarModal.style.display = 'flex';
+                    deletePasswordInput.value = ''; 
+                    deleteErrorMessage.style.display = 'none'; 
+                    deletePasswordInput.focus();
+                });
+            });
+        }
+
+        // Event listener สำหรับปุ่ม "ยกเลิก" ใน form ลบรถ
+        cancelDeleteButton.addEventListener('click', () => {
+            deleteCarModal.style.display = 'none';
+            deletePasswordInput.value = '';
+            deleteErrorMessage.style.display = 'none';
+            carIdToDelete = null;
+        });
+
+        // Event listener สำหรับปุ่ม "ยืนยันการลบ"
+        confirmDeleteButton.addEventListener('click', () => {
+            const password = deletePasswordInput.value;
+            if (password === DELETE_PASSWORD) {
+                if (carIdToDelete) {
+                    deleteCar(carIdToDelete);
+                } else {
+                    console.warn("No car ID to delete.");
+                    deleteErrorMessage.textContent = "เกิดข้อผิดพลาด: ไม่พบ ID รถที่ต้องการลบ";
+                    deleteErrorMessage.style.display = 'block';
+                }
+            } else {
+                deleteErrorMessage.textContent = "รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่";
+                deleteErrorMessage.style.display = 'block';
+            }
+        });
+
+        // Event listener สำหรับการกด Enter ในช่องรหัสผ่านลบ
+        deletePasswordInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                confirmDeleteButton.click();
+            }
+        });
+
+
+        // --- 7. Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    console.log("User already logged in (anonymous). Loading cars...");
+                    loadCars();
+                    showView('status-view');
+                } else {
+                    console.log("No user logged in. Showing login view.");
+                    showView('login-view');
+                }
+            });
+            // เรียก populateRouteOptions ครั้งแรกเมื่อ DOM โหลดเสร็จ เพื่อให้ dropdown มีข้อมูล
+            populateRouteOptions(); 
+        });
+    </script>
+</body>
+</html>
