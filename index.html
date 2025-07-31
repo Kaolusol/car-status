@@ -560,28 +560,30 @@
         let carIdToDelete = null;
 
         // --- 3. Global Variables ---
-        const CORRECT_PASSWORD = "124356"; // รหัสผ่านสำหรับเข้าสู่ระบบ
-        const DELETE_PASSWORD = "422104"; // รหัสผ่านสำหรับลบ, เพิ่ม, และอัปเดต
+        const CORRECT_PASSWORD = "123456"; // รหัสผ่านสำหรับเข้าสู่ระบบ
+        const DELETE_PASSWORD = "124356"; // รหัสผ่านสำหรับลบรถ
 
         // กำหนดสถานะที่เป็นไปได้สำหรับแต่ละเส้นทาง
         const statusOptionsByRoute = {
             "เส้นทาง 1 (ไป แจ่มฟ้า)": [ 
+                "กำลังจะออกจากจุด รับ-ส่ง แจ่มฟ้า สันกำแพง",
                 "กำลังไปรับจุดรับส่ง แจ่มฟ้า สันกำแพง",
                 "ถึงจุดรับ-ส่ง แจ่มฟ้า สันกำแพง",
                 "กำลังเดินทางไปสนามกอล์ฟ",
                 "ถึงสนามกอล์ฟ",
                 "กำลังกลับจุดรับส่ง",
                 "ถึงจุดรับส่งแล้ว",
-                "ระบบยังไม่เปิดทำการ" // เพิ่มสถานะนี้
+                "ระบบยังไม่เปิดทำการ"
             ],
-            "เส้นทาง 2 (ไปเซ็นทรัลเฟส)": [ 
-                "กำลังไปรับจุดรับส่ง เซนทรัลเฟส",
-                "ถึงจุดรับ-ส่ง เซนทรัลเฟส",
-                "กำลังเดินทางไปสนามกอล์ฟ", 
+            "เส้นทาง 2 (ไป Green Park)": [ 
+                "กำลังจะออกจาก จุดรับ-ส่ง Green Park",
+                "กำลังไปรับ จุดรับ-ส่ง Green Park",
+                "ถึง จุดรับ-ส่ง Green Park",
+                "กำลังเดินทางไปสนามกอลฟ์", 
                 "ถึงสนามกอล์ฟ", 
                 "กำลังกลับจุดรับส่ง", 
                 "ถึงจุดรับส่งแล้ว",
-                "ระบบยังไม่เปิดทำการ" // เพิ่มสถานะนี้
+                "ระบบยังไม่เปิดทำการ"
             ],
             "ทั่วไป (จอดพัก/ซ่อม)": [
                 "จอดพัก",
@@ -656,6 +658,7 @@
 
                     // หลังจากโหลดข้อมูลและสร้าง UI แล้ว ค่อยเพิ่ม Event Listeners ให้กับปุ่มต่างๆ
                     addUpdateEventListeners();
+                    addSelectChangeListeners();
                     addDeleteEventListeners(); 
 
                 } else {
@@ -728,6 +731,13 @@
                 });
         }
 
+        // ฟังก์ชันสำหรับอัปเดตสถานะที่แสดงบนหน้าจอเมื่อเลือกใน dropdown (UI Only)
+        function updateDisplayedStatus(spanId, newStatus) {
+            const statusSpan = document.getElementById(spanId);
+            if (statusSpan) {
+                statusSpan.textContent = newStatus;
+            }
+        }
 
         // ฟังก์ชันสำหรับเติม options ใน dropdown เลือกเส้นทาง
         function populateRouteOptions() {
@@ -778,16 +788,26 @@
             document.querySelectorAll('.update-button').forEach(button => {
                 button.onclick = null; 
                 button.addEventListener('click', (event) => {
-                    const passwordPrompt = prompt("กรุณากรอกรหัสผ่านสำหรับอัปเดตสถานะรถ:");
-                    if (passwordPrompt === DELETE_PASSWORD) {
-                        const form = event.target.closest('.car-item');
-                        const carId = form.dataset.carId;
-                        const newStatus = form.querySelector('select').value;
-                        if (confirm(`คุณต้องการอัปเดตสถานะรถทะเบียน ${carId} เป็น "${newStatus}" ใช่หรือไม่?`)) {
-                            updateCarStatus(carId, newStatus);
-                        }
-                    } else {
-                        alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถอัปเดตสถานะได้");
+                    const form = event.target.closest('.car-item');
+                    const carId = form.dataset.carId;
+                    const newStatus = form.querySelector('select').value;
+                    if (confirm(`คุณต้องการอัปเดตสถานะรถทะเบียน ${carId} เป็น "${newStatus}" ใช่หรือไม่?`)) {
+                        updateCarStatus(carId, newStatus);
+                    }
+                });
+            });
+        }
+        
+        // Event Listeners สำหรับการเปลี่ยนแปลงใน dropdown
+        function addSelectChangeListeners() {
+            document.querySelectorAll('.actions select').forEach(select => {
+                select.onchange = null; 
+                select.addEventListener('change', (event) => {
+                    const carId = event.target.dataset.carId;
+                    const newStatus = event.target.value;
+                    const statusSpan = document.getElementById(`${carId}-status`);
+                    if (statusSpan) {
+                        statusSpan.textContent = newStatus;
                     }
                 });
             });
@@ -795,13 +815,8 @@
 
         // Event listener สำหรับปุ่ม "เพิ่มยานพาหนะใหม่"
         addCarButton.addEventListener('click', () => {
-            const passwordPrompt = prompt("กรุณากรอกรหัสผ่านสำหรับเพิ่มยานพาหนะใหม่:");
-            if (passwordPrompt === DELETE_PASSWORD) {
-                populateRouteOptions(); // เรียกฟังก์ชันนี้เมื่อเปิด Modal
-                addCarModal.style.display = 'flex';
-            } else {
-                alert("รหัสผ่านไม่ถูกต้อง! ไม่สามารถเพิ่มยานพาหนะใหม่ได้");
-            }
+            populateRouteOptions(); // เรียกฟังก์ชันนี้เมื่อเปิด Modal
+            addCarModal.style.display = 'flex';
         });
 
         // Event listener สำหรับปุ่ม "ยกเลิก" ใน form เพิ่มรถ
