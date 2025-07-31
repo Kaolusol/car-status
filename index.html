@@ -697,7 +697,7 @@
                             </form>
                         `;
                         carListDiv.insertAdjacentHTML('beforeend', carItemHTML);
-
+                        
                         const selectElement = document.getElementById(`${carId}-select`);
                         if (selectElement) {
                             selectElement.value = car.status || currentRouteOptions[0];
@@ -705,7 +705,6 @@
                     });
 
                     addUpdateEventListeners();
-                    addSelectChangeListeners();
                     addDeleteEventListeners(); 
 
                 } else {
@@ -840,21 +839,6 @@
             });
         }
         
-        // Event Listeners สำหรับการเปลี่ยนแปลงใน dropdown
-        function addSelectChangeListeners() {
-            document.querySelectorAll('.actions select').forEach(select => {
-                select.onchange = null; 
-                select.addEventListener('change', (event) => {
-                    const carId = event.target.dataset.carId;
-                    const newStatus = event.target.value;
-                    const statusSpan = document.getElementById(`${carId}-status`);
-                    if (statusSpan) {
-                        statusSpan.textContent = newStatus;
-                    }
-                });
-            });
-        }
-
         // Event listener สำหรับปุ่ม "เพิ่มยานพาหนะใหม่"
         addCarButton.addEventListener('click', () => {
             populateRouteOptions();
